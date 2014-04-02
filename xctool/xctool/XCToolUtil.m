@@ -328,7 +328,6 @@ BOOL LaunchXcodebuildTaskAndFeedEventsToReporters(NSTask *task,
 {
   __block NSString *errorMessage = nil;
   __block long long errorCode = LONG_LONG_MIN;
-  __block BOOL hadFailingBuildCommand = NO;
 
   LaunchTaskAndFeedOuputLinesToBlock(task,
                                      @"running xcodebuild",
@@ -355,13 +354,6 @@ BOOL LaunchXcodebuildTaskAndFeedEventsToReporters(NSTask *task,
       PublishEventToReporters(reporters, event);
     }
 
-    if ([eventName isEqualToString:kReporter_Events_EndBuildCommand]) {
-      BOOL succeeded = [event[kReporter_EndBuildCommand_SucceededKey] boolValue];
-
-      if (!succeeded) {
-        hadFailingBuildCommand = YES;
-      }
-    }
   });
 
   if (errorMessage) {
@@ -369,11 +361,7 @@ BOOL LaunchXcodebuildTaskAndFeedEventsToReporters(NSTask *task,
     *errorCodeOut = errorCode;
   }
 
-  // xcodebuild's 'archive' action has a bug where the build can fail, but
-  // xcodebuild will still print 'ARCHIVE SUCCEEDED' and give you an exit status
-  // of 0.  To compensate, we'll only say xcodebuild succeeded if the exit status
-  // was 0 AND we saw no failing build commands.
-  return ([task terminationStatus] == 0) && !hadFailingBuildCommand;
+  return ([task terminationStatus] == 0);
 }
 
 BOOL RunXcodebuildAndFeedEventsToReporters(NSArray *arguments,

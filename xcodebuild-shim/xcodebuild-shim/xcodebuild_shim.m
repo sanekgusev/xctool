@@ -179,8 +179,7 @@ static void AnnounceEndSection(IDEActivityLogSection *section)
         kReporter_EndBuildCommand_TitleKey : section.title,
         // Xcode will only consider something a success if resultCode == 0 AND
         // there's no output that contains the string "error: ".
-        kReporter_EndBuildCommand_SucceededKey : ((section.resultCode == 0) &&
-                                                  (section.totalNumberOfErrors == 0)) ? @YES : @NO,
+        kReporter_EndBuildCommand_SucceededKey : (section.resultCode == 0) ? @YES : @NO,
         // Sometimes things will fail and 'emittedOutputText' will be nil.  We've seen this
         // happen when Xcode's Copy command fails.  In this case, just send an empty string
         // so Reporters don't have to worry about this sometimes being [NSNull null].
